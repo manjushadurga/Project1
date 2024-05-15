@@ -1,0 +1,25 @@
+---
+- name: Install Apache HTTP Server
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache (for Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Install Apache HTTP Server
+      package:
+        name: apache2
+        state: present
+      register: apache_install_result
+
+    - name: Ensure Apache service is running and enabled
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: apache_install_result.changed
+
+    - name: Display Apache version
+      command: apache2 -v
